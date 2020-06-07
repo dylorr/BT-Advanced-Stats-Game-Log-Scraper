@@ -1,6 +1,6 @@
 
 library(rvest)
-
+library(dplyr)
 
 #test inputs
 player = 'Landers Nolley II'
@@ -57,9 +57,29 @@ data1 = data[data != ""]
 #remove season summary stats appended at end of table
 data2 = data1[1:(length(data1)-6)]
 #create dataframe
-finaldata <- data.frame(matrix(data2, ncol=length(cols[1:33]), byrow=TRUE)) # leavs out the colspan
-names(finaldata) <- cols[1:33]
+bt_df <- data.frame(matrix(data2, ncol=length(cols[1:33]), byrow=TRUE)) # leavs out the colspan
+names(bt_df) <- cols[1:33]
 
 #add game_id col for easy filtering
-#finaldata <- cbind(pbp_loc_all, game_id_bt = pbp_loc_all$game_id)
+bt_df <- cbind(bt_df, game_id_bt = pbp_loc_all$game_id)
+#filter for only selected games. bascially a match using the user seleced pbp_loc
+bt_df_filtered = bt_df %>%
+  filter(game_id_bt %in% pbp_loc$game_id)
+
+#converts column of type factor to numeric for calculation purposes
+bt_df_filtered$ORtg = as.numeric(as.character(bt_df_filtered$ORtg))
+bt_df_filtered$Usage = as.numeric(as.character(bt_df_filtered$Usage))
+bt_df_filtered$NET = as.numeric(as.character(bt_df_filtered$NET))
+
+
+#Ortg, use in dashboard KPI output
+O_rtg <<- mean(bt_df_filtered$ORtg)
+usage <<- mean(bt_df_filtered$Usage)
+NET <<- mean(bt_df_filtered$NET)
+
+
+
+
+
+
 
